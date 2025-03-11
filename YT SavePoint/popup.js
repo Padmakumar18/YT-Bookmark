@@ -2,25 +2,29 @@ document.addEventListener("DOMContentLoaded", () => {
     const bookmarkBtn = document.getElementById("bookmark");
     const bookmarksList = document.getElementById("bookmarks");
     const clearAllBtn = document.getElementById("clearAll");
-    const errorMessage = document.getElementById("error-message"); // Error message element
+    const errorMessage = document.getElementById("error-message");
 
     if (!bookmarkBtn || !bookmarksList || !clearAllBtn || !errorMessage) {
         console.error("Required elements not found in popup.html.");
         return;
     }
 
-    // Check if the active tab is a YouTube video
+    chrome.storage.local.get("bookmarks", (data) => {
+        if (data.bookmarks) {
+            data.bookmarks.forEach(addBookmarkToUI);
+        }
+    });
+
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         if (!tabs[0] || !tabs[0].url.includes("youtube.com/watch")) {
             showError("This extension only works on YouTube videos.");
             bookmarkBtn.disabled = true;
-            bookmarkBtn.textContent = "Not a YouTube Video";
-            bookmarkBtn.style.backgroundColor = "#888"; // Greyed out
+            bookmarkBtn.textContent = "Play YouTube Video";
+            bookmarkBtn.style.backgroundColor = "#888";
             return;
         }
     });
 
-    // Add bookmark functionality
     bookmarkBtn.addEventListener("click", () => {
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
             if (!tabs[0] || !tabs[0].url.includes("youtube.com/watch")) {
@@ -34,17 +38,17 @@ document.addEventListener("DOMContentLoaded", () => {
             }, (results) => {
                 if (results && results[0]) {
                     const timestamp = results[0].result;
-                    const videoTitle = tabs[0].title.split(" - ")[0]; // Extracting video title
+                    const videoTitle = tabs[0].title.split(" - ")[0];
                     const formattedTime = formatTimestamp(timestamp);
                     const newBookmark = {
                         url: `${tabs[0].url}&t=${timestamp}s`,
                         display: `${formattedTime} - ${videoTitle}`
                     };
 
-                    chrome.storage.sync.get("bookmarks", (data) => {
+                    chrome.storage.local.get("bookmarks", (data) => {
                         const bookmarks = data.bookmarks || [];
                         bookmarks.push(newBookmark);
-                        chrome.storage.sync.set({ bookmarks });
+                        chrome.storage.local.set({ bookmarks });
                         addBookmarkToUI(newBookmark);
                     });
                 }
@@ -58,9 +62,15 @@ document.addEventListener("DOMContentLoaded", () => {
         li.textContent = bookmark.display;
 
         const deleteBtn = document.createElement("img");
-        deleteBtn.src = "delete-icon.png"; 
+        deleteBtn.src = "delete-icon.png";
         deleteBtn.alt = "Delete";
         deleteBtn.className = "delete-icon";
+        
+        deleteBtn.style.width = "16px";
+        deleteBtn.style.height = "16px";
+        deleteBtn.style.marginLeft = "10px";
+        deleteBtn.style.cursor = "pointer";
+        deleteBtn.style.verticalAlign = "middle";
 
         deleteBtn.addEventListener("click", (event) => {
             event.stopPropagation();
@@ -68,24 +78,20 @@ document.addEventListener("DOMContentLoaded", () => {
             li.remove();
         });
 
-        li.addEventListener("click", () => {
-            chrome.tabs.create({ url: bookmark.url });
-        });
-
         li.appendChild(deleteBtn);
         bookmarksList.appendChild(li);
     }
 
     function removeBookmark(bookmark) {
-        chrome.storage.sync.get("bookmarks", (data) => {
+        chrome.storage.local.get("bookmarks", (data) => {
             const bookmarks = data.bookmarks || [];
             const updatedBookmarks = bookmarks.filter(b => b.url !== bookmark.url);
-            chrome.storage.sync.set({ bookmarks: updatedBookmarks });
+            chrome.storage.local.set({ bookmarks: updatedBookmarks });
         });
     }
 
     clearAllBtn.addEventListener("click", () => {
-        chrome.storage.sync.set({ bookmarks: [] }, () => {
+        chrome.storage.local.set({ bookmarks: [] }, () => {
             bookmarksList.innerHTML = "";
         });
     });
@@ -104,7 +110,6 @@ document.addEventListener("DOMContentLoaded", () => {
     function showError(message) {
         errorMessage.textContent = message;
         errorMessage.style.display = "block";
-
         // setTimeout(() => {
         //     errorMessage.style.display = "none";
         // }, 2000);
