@@ -1,24 +1,30 @@
-// popup.js
 document.addEventListener("DOMContentLoaded", () => {
     const bookmarkBtn = document.getElementById("bookmark");
     const bookmarksList = document.getElementById("bookmarks");
     const clearAllBtn = document.getElementById("clearAll");
+    const errorMessage = document.getElementById("error-message"); // Error message element
 
-    if (!bookmarkBtn || !bookmarksList || !clearAllBtn) {
+    if (!bookmarkBtn || !bookmarksList || !clearAllBtn || !errorMessage) {
         console.error("Required elements not found in popup.html.");
         return;
     }
 
-    chrome.storage.sync.get("bookmarks", (data) => {
-        if (data.bookmarks) {
-            data.bookmarks.forEach(addBookmarkToUI);
+    // Check if the active tab is a YouTube video
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (!tabs[0] || !tabs[0].url.includes("youtube.com/watch")) {
+            showError("This extension only works on YouTube videos.");
+            bookmarkBtn.disabled = true;
+            bookmarkBtn.textContent = "Not a YouTube Video";
+            bookmarkBtn.style.backgroundColor = "#888"; // Greyed out
+            return;
         }
     });
 
+    // Add bookmark functionality
     bookmarkBtn.addEventListener("click", () => {
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
             if (!tabs[0] || !tabs[0].url.includes("youtube.com/watch")) {
-                alert("Please open a YouTube video to bookmark.");
+                showError("Please open a YouTube video to bookmark.");
                 return;
             }
 
@@ -52,7 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
         li.textContent = bookmark.display;
 
         const deleteBtn = document.createElement("img");
-        deleteBtn.src = "delete-icon.png"; // Ensure this icon is in the extension folder
+        deleteBtn.src = "delete-icon.png"; 
         deleteBtn.alt = "Delete";
         deleteBtn.className = "delete-icon";
 
@@ -93,5 +99,14 @@ document.addEventListener("DOMContentLoaded", () => {
         const minutes = Math.floor(seconds / 60);
         const secs = seconds % 60;
         return `${minutes}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function showError(message) {
+        errorMessage.textContent = message;
+        errorMessage.style.display = "block";
+
+        // setTimeout(() => {
+        //     errorMessage.style.display = "none";
+        // }, 2000);
     }
 });
