@@ -15,15 +15,27 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    // chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    //     if (!tabs[0] || !tabs[0].url.includes("youtube.com/watch")) {
+    //         showError("This extension only works on YouTube videos.");
+    //         bookmarkBtn.disabled = true;
+    //         bookmarkBtn.textContent = "Play YouTube Video";
+    //         bookmarkBtn.style.backgroundColor = "#888";
+    //         return;
+    //     }
+    // });
+
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         if (!tabs[0] || !tabs[0].url.includes("youtube.com/watch")) {
-            showError("This extension only works on YouTube videos.");
-            bookmarkBtn.disabled = true;
-            bookmarkBtn.textContent = "Play YouTube Video";
-            bookmarkBtn.style.backgroundColor = "#888";
+            showError("This extension works when a YouTube video is playing.");
+            bookmarkBtn.style.display = "none";
+            // if(bookmarksList) {
+            //     clearAllBtn.style.display = "none" ;
+            // }
             return;
         }
     });
+    
 
     bookmarkBtn.addEventListener("click", () => {
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -65,7 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
         deleteBtn.src = "delete-icon.png";
         deleteBtn.alt = "Delete";
         deleteBtn.className = "delete-icon";
-        
+
         deleteBtn.style.width = "16px";
         deleteBtn.style.height = "16px";
         deleteBtn.style.marginLeft = "10px";
