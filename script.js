@@ -1,6 +1,6 @@
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
     const taskInput = document.getElementById("taskInput");
-    const addTaskButton = document.getElementById("addTask");
+    const addTaskButton = document.getElementById("addTaskBtn");
     const taskList = document.getElementById("taskList");
     const clearAllButton = document.getElementById("clearAll");
 
@@ -18,15 +18,15 @@ document.addEventListener("DOMContentLoaded", function() {
             const li = document.createElement("li");
             li.innerHTML = `
                 <span class="${task.completed ? 'completed' : ''}">${task.text}</span>
-                <button onclick="editTask(${index})">Edit</button>
-                <button onclick="deleteTask(${index})">Delete</button>
-                <button onclick="toggleComplete(${index})">✔</button>
+                <button class="edit" data-index="${index}">Edit</button>
+                <button class="delete" data-index="${index}">Delete</button>
+                <button class="toggle" data-index="${index}">✔</button>
             `;
             taskList.appendChild(li);
         });
     }
 
-    window.addTask = function() {
+    function addTask() {
         const tasks = getTasks();
         if (taskInput.value.trim()) {
             tasks.push({ text: taskInput.value, completed: false });
@@ -34,9 +34,9 @@ document.addEventListener("DOMContentLoaded", function() {
             taskInput.value = "";
             renderTasks();
         }
-    };
+    }
 
-    window.editTask = function(index) {
+    function editTask(index) {
         const tasks = getTasks();
         const newText = prompt("Edit your task", tasks[index].text);
         if (newText) {
@@ -44,27 +44,35 @@ document.addEventListener("DOMContentLoaded", function() {
             saveTasks(tasks);
             renderTasks();
         }
-    };
+    }
 
-    window.deleteTask = function(index) {
+    function deleteTask(index) {
         const tasks = getTasks();
         tasks.splice(index, 1);
         saveTasks(tasks);
         renderTasks();
-    };
+    }
 
-    window.toggleComplete = function(index) {
+    function toggleComplete(index) {
         const tasks = getTasks();
         tasks[index].completed = !tasks[index].completed;
         saveTasks(tasks);
         renderTasks();
-    };
+    }
 
-    clearAllButton.addEventListener("click", function() {
+    clearAllButton.addEventListener("click", function () {
         localStorage.removeItem("tasks");
         renderTasks();
     });
 
     addTaskButton.addEventListener("click", addTask);
+
+    taskList.addEventListener("click", function (event) {
+        const index = event.target.dataset.index;
+        if (event.target.classList.contains("edit")) editTask(index);
+        if (event.target.classList.contains("delete")) deleteTask(index);
+        if (event.target.classList.contains("toggle")) toggleComplete(index);
+    });
+
     renderTasks();
 });

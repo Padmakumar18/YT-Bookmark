@@ -1,15 +1,14 @@
 {
     "manifest_version": 3,
-    "name": "To-Do list",
+    "name": "To-Do List",
     "version": "1.0",
-    "description": "Bookmark timestamps in YouTube videos",
-    "permissions": ["storage", "tabs", "scripting"],
-    "host_permissions": ["https://www.youtube.com/watch*"],
-    "background": {
-        "service_worker": "background.js"
-    },
+    "description": "A simple to-do list extension",
+    "permissions": ["storage"],
     "action": {
         "default_popup": "index.html",
         "default_icon": "icon.png"
+    },
+    "content_security_policy": {
+        "extension_pages": "script-src 'self'; object-src 'none';"
     }
-  }
+}
