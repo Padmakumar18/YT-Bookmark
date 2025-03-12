@@ -1,0 +1,15 @@
+{
+    "manifest_version": 3,
+    "name": "YT Bookmark",
+    "version": "1.0",
+    "description": "Bookmark timestamps in YouTube videos",
+    "permissions": ["storage", "tabs", "scripting"],
+    "host_permissions": ["https://www.youtube.com/watch*"],
+    "background": {
+        "service_worker": "background.js"
+    },
+    "action": {
+        "default_popup": "index.html",
+        "default_icon": "icon.png"
+    }
+  }
