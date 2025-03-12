@@ -1,6 +1,6 @@
 {
     "manifest_version": 3,
-    "name": "YT Bookmark",
+    "name": "To-Do list",
     "version": "1.0",
     "description": "Bookmark timestamps in YouTube videos",
     "permissions": ["storage", "tabs", "scripting"],
